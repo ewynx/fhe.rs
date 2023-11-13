@@ -9,6 +9,7 @@ use ndarray::{ArrayView1, ArrayViewMut1};
 use num_bigint::BigUint;
 use num_traits::{One, ToPrimitive, Zero};
 use std::{cmp::min, sync::Arc};
+use fhe_util::div_ceil;
 
 /// Scaling factor when performing a RNS scaling.
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
@@ -257,7 +258,7 @@ impl RnsScaler {
         }
         // Let's compute v = round(sum_theta_garner / 2^theta_garner_shift)
         sum_theta_garner >>= self.theta_garner_shift - 1;
-        let v = sum_theta_garner.as_u128().div_ceil(2);
+        let v = div_ceil(sum_theta_garner.as_u128(), 2);
 
         // If the scaling factor is not 1, compute the inner product with the
         // theta_omega
@@ -297,7 +298,7 @@ impl RnsScaler {
                 w /= 2;
             } else {
                 w = (sum_theta_omega >> 126isize).as_u128();
-                w = w.div_ceil(2)
+                w = div_ceil(w, 2)
             }
         }
 

@@ -67,12 +67,27 @@ pub fn sample_vec_cbd<R: RngCore + CryptoRng>(
     Ok(out)
 }
 
+/// Ceiled integer division
+pub fn div_ceil<T>(numerator: T, denominator: T) -> T 
+  where T: std::ops::Add<Output = T> 
+  + std::ops::Sub<Output = T> 
+  + std::ops::Div<Output = T> 
+  + From<u8> 
+  + Copy 
+  + std::cmp::PartialEq {
+  if denominator == T::from(0) {
+      panic!("div_ceil: division by zero");
+  } else {
+      (numerator + denominator - T::from(1)) / denominator
+  }
+}
+
 /// Transcodes a vector of u64 of `nbits`-bit numbers into a vector of bytes.
 pub fn transcode_to_bytes(a: &[u64], nbits: usize) -> Vec<u8> {
     assert!(0 < nbits && nbits <= 64);
 
     let mask = (u64::MAX >> (64 - nbits)) as u128;
-    let nbytes = (a.len() * nbits).div_ceil(8);
+    let nbytes = div_ceil(a.len() * nbits, 8);
     let mut out = Vec::with_capacity(nbytes);
 
     let mut current_index = 0;
@@ -107,7 +122,7 @@ pub fn transcode_from_bytes(b: &[u8], nbits: usize) -> Vec<u64> {
     assert!(0 < nbits && nbits <= 64);
     let mask = (u64::MAX >> (64 - nbits)) as u128;
 
-    let nelements = (b.len() * 8).div_ceil(nbits);
+    let nelements = div_ceil(b.len() * 8, nbits);
     let mut out = Vec::with_capacity(nelements);
 
     let mut current_value = 0u128;
@@ -143,7 +158,7 @@ pub fn transcode_bidirectional(a: &[u64], input_nbits: usize, output_nbits: usiz
 
     let input_mask = (u64::MAX >> (64 - input_nbits)) as u128;
     let output_mask = (u64::MAX >> (64 - output_nbits)) as u128;
-    let output_size = (a.len() * input_nbits).div_ceil(output_nbits);
+    let output_size = div_ceil(a.len() * input_nbits, output_nbits);
     let mut out = Vec::with_capacity(output_size);
 
     let mut current_index = 0;

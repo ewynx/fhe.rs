@@ -10,6 +10,7 @@ use itertools::Itertools;
 use num_bigint::BigUint;
 use rand::{rngs::OsRng, thread_rng};
 use std::time::Duration;
+use fhe_util::div_ceil;
 
 pub fn bfv_benchmark(c: &mut Criterion) {
     let mut rng = thread_rng();
@@ -248,7 +249,7 @@ pub fn bfv_benchmark(c: &mut Criterion) {
             );
 
             // Second multiplication option.
-            let nmoduli = q.div_ceil(62);
+            let nmoduli = div_ceil(q,62);
             let mut extended_basis = par.moduli().to_vec();
             let mut upper_bound = u64::MAX >> 2;
             while extended_basis.len() != nmoduli + par.moduli().len() {
